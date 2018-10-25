@@ -1,9 +1,12 @@
-h2, #canvas-wrapper {
+h2 {
     text-align: center;
 }
 
-input {
-    display: inline-block;
+#canvas-wrapper {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 #myCanvas {
