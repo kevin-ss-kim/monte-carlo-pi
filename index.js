@@ -13,34 +13,51 @@ var dotsInCircle = 0, dotsOutsideCircle = 0
 var RADIUS = canvas.width
 var button = document.getElementById('start-button')
 
-var chart = null;
-var lineChartRange = [0, 2 * Math.PI]
-var lineChartData = [
-    {
-        label: 'Series 1',
-        values: [],
-        range: lineChartRange
-    }
-];
+var data = [];
+var chart = echarts.init(document.getElementById('lineChart'));
+var chartOption = {
+    title: {
+        text: 'PI'
+    },
+    xAxis: {
+        type: 'time',
+        splitLine: {
+            show: false
+        }
+    },
+    yAxis: {
+        type: 'value',
+        boundaryGap: [0, '100%'],
+        splitLine: {
+            show: false
+        },
+        scale: true
+    },
+    series: [{
+        name: 'pi',
+        type: 'line',
+        showSymbol: false,
+        hoverAnimation: false,
+        data: data
+    }]
+};
 
-button.onclick = function() {
+button.onclick = function () {
     button.disabled = true;
     drawLineChart();
     startAnimation();
 }
 
 function drawLineChart() {
-    chart = $('#lineChart').epoch({
-        type: 'time.line',
-        axes: ['right', 'bottom', 'left'],
-        data: lineChartData
-    })
+    chart.setOption(chartOption)
 }
 
 function startAnimation() {
-    var drawDots = setInterval(function() { drawDot(); })
-    setTimeout(function() {
+    var drawDots = setInterval(function () { drawDot(); })
+    var calculatePi = setInterval(function () { approximatePi(); }, 100)
+    setTimeout(function () {
         clearInterval(drawDots);
+        clearInterval(calculatePi);
         button.disabled = false;
     }, numDots * 10)
 }
@@ -58,7 +75,6 @@ function drawDot() {
         context.fillRect(x, y, 1, 1);
         dotsOutsideCircle++;
     }
-    approximatePi();
 }
 
 function approximatePi() {
@@ -67,6 +83,17 @@ function approximatePi() {
 }
 
 function updateChartData(value) {
-    lineChartData[0].values.push({ time: (new Date).getTime(), y: value })
-    chart.update(lineChartData)
+    if (data.length > 50) {
+        data.shift()
+    }
+    data.push({
+        name: '',
+        value: [data.length, value]
+    });
+    console.log(data)
+    chart.setOption({
+        series: [{
+            data: data
+        }]
+    })
 }
