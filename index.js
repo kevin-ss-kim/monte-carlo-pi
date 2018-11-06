@@ -1,5 +1,5 @@
-// Set number of dots to draw and frequency of dots appearing
-var numDots = 50000, interval = 0.1
+// Set number of dots to draw
+var numDots = 1000
 
 var canvas = document.getElementById('myCanvas');
 var context = canvas.getContext('2d');
@@ -13,22 +13,36 @@ var dotsInCircle = 0, dotsOutsideCircle = 0
 var RADIUS = canvas.width
 var button = document.getElementById('start-button')
 
-var lineChartData = [];
+var chart = null;
+var lineChartRange = [0, 2 * Math.PI]
+var lineChartData = [
+    {
+        label: 'Series 1',
+        values: [],
+        range: lineChartRange
+    }
+];
 
 button.onclick = function() {
     button.disabled = true;
     drawLineChart();
     startAnimation();
-    button.disabled = false;
 }
 
 function drawLineChart() {
-    var margin = d3.schemeCategory10;
+    chart = $('#lineChart').epoch({
+        type: 'time.line',
+        axes: ['right', 'bottom', 'left'],
+        data: lineChartData
+    })
 }
 
 function startAnimation() {
-    var drawDots = setInterval(function() { drawDot(); }, interval)
-    setTimeout(function() { clearInterval(drawDots); }, numDots)
+    var drawDots = setInterval(function() { drawDot(); })
+    setTimeout(function() {
+        clearInterval(drawDots);
+        button.disabled = false;
+    }, numDots * 10)
 }
 
 function drawDot() {
@@ -36,25 +50,23 @@ function drawDot() {
     var y = Math.floor(Math.random() * RADIUS);
     var distance = Math.sqrt(x * x + y * y)
     if (distance <= RADIUS) {
-        context.fillStyle = "#FF0000"
-        context.fillRect(x, y, 1, 1)
+        context.fillStyle = "#FF0000";
+        context.fillRect(x, y, 1, 1);
         dotsInCircle++;
     } else {
-        context.fillStyle = "#0000FF"
-        context.fillRect(x, y, 1, 1)
+        context.fillStyle = "#0000FF";
+        context.fillRect(x, y, 1, 1);
         dotsOutsideCircle++;
     }
-    seedData();
+    approximatePi();
 }
 
 function approximatePi() {
-    return 4 * dotsInCircle / (dotsInCircle + dotsOutsideCircle);
+    var pi = 4 * dotsInCircle / (dotsInCircle + dotsOutsideCircle);
+    updateChartData(pi)
 }
 
-function seedData() {
-    for (var i = 0; i < 100; i++) {
-        lineChartData.push({
-            PI: approximatePi()
-        });
-    }
+function updateChartData(value) {
+    lineChartData[0].values.push({ time: (new Date).getTime(), y: value })
+    chart.update(lineChartData)
 }
