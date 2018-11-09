@@ -23,7 +23,8 @@ var chartOption = {
         type: 'time',
         splitLine: {
             show: false
-        }
+        },
+        show: false
     },
     yAxis: {
         type: 'value',
